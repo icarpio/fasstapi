@@ -25,6 +25,7 @@ async def teacher_chat(
     audio: UploadFile = File(...),
     level: str = Form(...),
     topic: str = Form(...),
+    voice: str = Form("alloy"),   # <-- NUEVO: valor enviado desde frontend
     history: str = Form("")
 ):
     client = get_openai_client()
@@ -59,11 +60,11 @@ async def teacher_chat(
     except Exception as e:
         return JSONResponse({"error": f"Error GPT: {str(e)}"}, status_code=500)
 
-    # 4️⃣ Generar TTS
+    # 4️⃣ Generar TTS con la voz seleccionada
     try:
         tts = client.audio.speech.create(
             model="gpt-4o-mini-tts",
-            voice="alloy",
+            voice=voice,       # <-- USAR VOZ DEL FORMULARIO
             input=teacher_text
         )
         audio_base64 = base64.b64encode(tts.read()).decode("utf-8")
@@ -75,3 +76,4 @@ async def teacher_chat(
         "reply_text": teacher_text,
         "reply_audio": audio_base64
     }
+
